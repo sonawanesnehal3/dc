@@ -42,6 +42,7 @@ const handleDrop = (e) => {
           return
         } else {
           loadDC = true;
+          window.location = '/drafts/gunn/solo-drop-zone'
         }
         console.log(`KIND = file, file[${i}].name = ${file.name}`);
       }
@@ -53,6 +54,7 @@ const handleDrop = (e) => {
         return
       } else {
         loadDC = true;
+        window.location = '/drafts/gunn/solo-drop-zone'
       }
       console.log(`file[${i}].name = ${file.name}`);
     });
@@ -79,8 +81,8 @@ export default function init(element) {
           const heading = createTag('h1', { class: 'widget-heading' }, `${content[1].textContent}`);
           const dropZone = createTag('div', { id: 'dZone', class: 'widget-center' });
           const copy = createTag('p', { class: 'widget-copy' }, `${content[2].textContent}`);
-          const button = createTag('input', { type: 'file', id: 'file-upload', class: 'hide' }, `${content[3].textContent}`);
-          const buttonLabel = createTag('label', { for: 'file-upload', class: 'widget-button' }, `${content[3].textContent}`);
+          // const button = createTag('input', { type: 'file', id: 'file-upload', class: 'hide' }, `${content[3].textContent}`);
+          const buttonLabel = createTag('a', { href: '/drafts/gunn/solo-drop-zone', class: 'widget-button' }, `${content[3].textContent}`);
           const legal = createTag('p', { class: 'widget-legal' }, `${content[4].textContent}`);
           const subTitle = createTag('p',{ class: 'widget-sub' } , 'Adobe Acrobat');
           const upsell = createTag('p',{ class: 'demo-text' } , content[5].textContent);
@@ -103,7 +105,7 @@ export default function init(element) {
             wrapper.append(dropZone)
             dropZone.append(copy);
             copy.prepend(icon);
-            dropZone.append(button);
+            // dropZone.append(button);
             dropZone.append(buttonLabel);
             wrapper.append(footer)
             // wrapper.append(legal);
@@ -117,17 +119,7 @@ export default function init(element) {
             heading.prepend(secondConversion);
           }
 
-          const dcWidgetScript = createTag('script', {
-            id: 'adobe_dc_sdk_launcher',
-            src: 'https://stage.acrobat.adobe.com/dc-hosted/3.8.0_2.15.2/dc-app-launcher.js',
-            'data-dropzone_id': 'CID',
-            'data-locale': 'us-en',
-            'data-server_env': 'prod',
-            'data-verb': 'pdf-to-ppt',
-            'data-load_typekit': 'false',
-            'data-load_imslib': 'false',
-            'data-enable_unload_prompt': 'true',
-          });
+
 
           dropZone.addEventListener('dragover', (file) => {
             handleDragOver(file);
@@ -140,18 +132,8 @@ export default function init(element) {
           dropZone.addEventListener('drop', (file) => {
             handleDrop(file);
             dropZone.classList.remove('dragging');
-            //make call to dc web and pass over file 
-            if (loadDC) {element.append(dcWidgetScript) }
             if (loadDC) {window.localStorage.limit = 1 + Number(window.localStorage.limit) }
-            // loadScript('https://stage.acrobat.adobe.com/dc-hosted/3.10.0_2.16.2/dc-app-launcher.js');
           })
 
-          button.addEventListener('change', (e) => {
-            // const selectedFile = document.getElementById("file-upload").files[0];
-            console.log(selectedFile);
-            if (loadDC) {element.append(dcWidgetScript) }
-            if (loadDC) {window.localStorage.limit = 1 + Number(window.localStorage.limit) }
-          })
-        // })
 
 }

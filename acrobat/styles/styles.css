@@ -15,6 +15,9 @@ div[data-section="widget"] {
   background-color: #fc6767;
   min-height: 570px;
 }
+.dc-converter-widget {
+  min-height: calc(100vh - 100px) !important;
+}
 @media (max-width: 600px) {
   #dc-converter-widget {
     height: calc(100vh - 110px);
@@ -459,6 +462,12 @@ div.how-to ol li::before{
   margin: 16px auto;
   text-align: center;
   color: #fff;
+}
+
+.widget-button:hover {
+  text-decoration: none;
+  color: #fff;
+  background: #0054b6;
 }
 
 @media (max-width: 600px) {
