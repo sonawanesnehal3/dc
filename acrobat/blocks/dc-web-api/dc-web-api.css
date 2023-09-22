@@ -62,12 +62,23 @@
   background-repeat: no-repeat;
 }
 
-.security-icon {
+div.security-icon,
+#security-icon {
   width: 30px;
   height: 30px;
   background-image: url(../../img/icons/widget-sec.png);
   background-size: contain;
   background-repeat: no-repeat;
+  min-height: unset !important;
+}
+
+@media (max-width: 600px) {
+  .security-icon {
+    display: none;
+  }
+  .widget-legal {
+    margin: 30px 50px 20px;
+  }
 }
 
 .widget-footer {

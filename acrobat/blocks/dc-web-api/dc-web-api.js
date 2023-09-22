@@ -88,7 +88,7 @@ export default function init(element) {
           const upsell = createTag('p',{ class: 'demo-text' } , content[5].textContent);
 
           const iconLogo = createTag('div',{ class:  'widget-icon'} );
-          const iconSecurity = createTag('div',{ class:  'security-icon'} );
+          const iconSecurity = createTag('div',{ id: 'security-icon', class:  'security-icon'} );
           const icon = createTag('div',{ class:  'widget-big-icon'} );
           
           const footer = createTag('div',{ class:  'widget-footer'} );

@@ -456,7 +456,8 @@ div.how-to ol li::before{
 
 .widget-button {
   border-radius: 24px;
-  width: 441px;
+  max-width: 441px;
+  width: 55%;
   padding: 10px;
   background: #0265dc;
   margin: 16px auto;
