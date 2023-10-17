@@ -41,7 +41,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       TESTSUITE: "@smoke"
-      BASICTESTS: "$TESTSUITE and (not (@analytics or @extension-installed))"
+      BASICTESTS: "${{ TESTSUITE }} and (not (@analytics or @extension-installed))"
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -61,7 +61,7 @@ jobs:
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run the tests
-        run: npx run test/e2e/frictionless -t $BASICTESTS -h -p prod -b ${{ matrix.browser }} --bypassBotDetection
+        run: npx run test/e2e/frictionless -t ${{ BASICTESTS }} -h -p prod -b ${{ matrix.browser }} --bypassBotDetection
         env:
           USER_AGENT_SUFFIX: "${{ secrets.USER_AGENT_SUFFIX }}"
 
