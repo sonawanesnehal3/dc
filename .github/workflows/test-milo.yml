@@ -40,8 +40,8 @@ jobs:
     name: Smoke Test
     runs-on: ${{ matrix.os }}
     env:
-      TESTSUITE: '@smoke'
-      BASICTESTS: '$TESTSUITE and (not (@analytics or @extension-installed))'
+      TESTSUITE: "@smoke"
+      BASICTESTS: "$TESTSUITE and (not (@analytics or @extension-installed))"
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
