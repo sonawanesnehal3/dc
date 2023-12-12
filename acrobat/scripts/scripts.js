@@ -286,21 +286,21 @@ const { ietf } = getLocale(locales);
     const blockName = widgetBlock.classList.value;
     widgetBlock.removeAttribute('class');
     widgetBlock.id = 'dc-converter-widget';
-    const DC_GENERATE_CACHE_VERSION = document.querySelector('meta[name="dc-generate-cache-version"]')?.getAttribute('content');
-    const INLINE_SNIPPET = document.querySelector('section#edge-snippet');
-    const dcUrls = INLINE_SNIPPET ? [] : [
-      `https://www.adobe.com/dc/dc-generate-cache/dc-hosted-${DC_GENERATE_CACHE_VERSION}/${verb}-${ietf.toLowerCase()}.html`,
-    ];
+    // const DC_GENERATE_CACHE_VERSION = document.querySelector('meta[name="dc-generate-cache-version"]')?.getAttribute('content');
+    // const INLINE_SNIPPET = document.querySelector('section#edge-snippet');
+    // const dcUrls = INLINE_SNIPPET ? [] : [
+    //   `https://www.adobe.com/dc/dc-generate-cache/dc-hosted-${DC_GENERATE_CACHE_VERSION}/${verb}-${ietf.toLowerCase()}.html`,
+    // ];
 
-    dcUrls.forEach((url) => {
-      const link = document.createElement('link');
-      link.setAttribute('rel', 'prefetch');
-      if (url.split('.').pop() === 'html') { link.setAttribute('as', 'fetch'); }
-      if (url.split('.').pop() === 'js') { link.setAttribute('as', 'script'); }
-      link.setAttribute('href', url);
-      link.setAttribute('crossorigin', '');
-      document.head.appendChild(link);
-    });
+    // dcUrls.forEach((url) => {
+    //   const link = document.createElement('link');
+    //   link.setAttribute('rel', 'prefetch');
+    //   if (url.split('.').pop() === 'html') { link.setAttribute('as', 'fetch'); }
+    //   if (url.split('.').pop() === 'js') { link.setAttribute('as', 'script'); }
+    //   link.setAttribute('href', url);
+    //   link.setAttribute('crossorigin', '');
+    //   document.head.appendChild(link);
+    // });
 
     const { default: dcConverter } = await import(`../blocks/${blockName}/${blockName}.js`);
     await dcConverter(widgetBlock);
