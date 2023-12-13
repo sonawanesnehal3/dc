@@ -133,7 +133,7 @@ const langFromPath = url.pathname.split('/')[1];
 const pageLang = localeMap[langFromPath] || 'en-us';
 
 export default async function init(element) {
-  element.closest('main > div').dataset.section = 'widget';
+  // element.closest('main > div').dataset.section = 'widget';
   const widget = element;
   const DC_WIDGET_VERSION_FALLBACK = '3.7.1_2.14.0';
   const DC_GENERATE_CACHE_VERSION_FALLBACK = '2.14.0';
@@ -182,10 +182,11 @@ export default async function init(element) {
   }
 
   const [FIRST_DIV, REDIRECT_URL_DIV, GENERATE_CACHE_URL_DIV] = widget.querySelectorAll(':scope > div');
+  console.log(REDIRECT_URL_DIV);
   FIRST_DIV.id = 'VERB';
   const VERB = FIRST_DIV.textContent.trim().toLowerCase();
 
-  if (REDIRECT_URL_DIV) {
+  if (REDIRECT_URL_DIV && REDIRECT_URL_DIV.id !== 'CID') {
     REDIRECT_URL = REDIRECT_URL_DIV.textContent.trim();
     REDIRECT_URL_DIV.remove();
   }
@@ -216,44 +217,45 @@ export default async function init(element) {
     }
   };
 
-  const widgetContainer = document.createElement('div');
-  widgetContainer.id = 'CID';
-  widgetContainer.className = `fsw wapper-${VERB}`;
-  widget.appendChild(widgetContainer);
+  // const widgetContainer = document.createElement('div');
+  // widgetContainer.id = 'CID';
+  // widgetContainer.className = `fsw wapper-${VERB}`;
+  // widget.appendChild(widgetContainer);
 
-  const isRedirection = /redirect_(?:conversion|files)=true/.test(window.location.search);
-  const { cookie } = document;
-  const limitCookie = exhLimitCookieMap[VERB] || exhLimitCookieMap[VERB.match(/^pdf-to|to-pdf$/)?.[0]];
-  const cookiePrefix = appEnvCookieMap[ENV] || '';
-  const isLimitExhausted = limitCookie && cookie.includes(`${cookiePrefix}${limitCookie}`);
-  const preRenderDropZone = !isLimitExhausted && !isRedirection;
+  // const isRedirection = /redirect_(?:conversion|files)=true/.test(window.location.search);
+  // const { cookie } = document;
+  // const limitCookie = exhLimitCookieMap[VERB] || exhLimitCookieMap[VERB.match(/^pdf-to|to-pdf$/)?.[0]];
+  // const cookiePrefix = appEnvCookieMap[ENV] || '';
+  // const isLimitExhausted = limitCookie && cookie.includes(`${cookiePrefix}${limitCookie}`);
+  // const preRenderDropZone = !isLimitExhausted && !isRedirection;
 
-  const INLINE_SNIPPET = widget.querySelector(':scope > section#edge-snippet');
-  if (INLINE_SNIPPET) {
-    if (!isLimitExhausted) {
-      widgetContainer.dataset.rendered = 'true';
-      widgetContainer.appendChild(...INLINE_SNIPPET.childNodes);
-      performance.mark('milo-move-snippet');
-    }
-    widget.removeChild(INLINE_SNIPPET);
-  } else if (preRenderDropZone) {
-    const response = await fetch(DC_GENERATE_CACHE_URL || `${DC_DOMAIN}/dc-generate-cache/dc-hosted-${DC_GENERATE_CACHE_VERSION}/${VERB}-${pageLang}.html`);
-    switch (response.status) {
-      case 200: {
-        const template = await response.text();
-        if (!('rendered' in widgetContainer.dataset)) {
-          widgetContainer.dataset.rendered = 'true';
-          const doc = new DOMParser().parseFromString(template, 'text/html');
-          document.head.appendChild(doc.head.getElementsByTagName('Style')[0]);
-          widgetContainer.appendChild(doc.body.firstElementChild);
-          performance.mark('milo-insert-snippet');
-        }
-        break;
-      }
-      default:
-        break;
-    }
-  }
+  // const INLINE_SNIPPET = widget.querySelector(':scope > section#edge-snippet');
+  // if (INLINE_SNIPPET) {
+  //   if (!isLimitExhausted) {
+  //     widgetContainer.dataset.rendered = 'true';
+  //     widgetContainer.appendChild(...INLINE_SNIPPET.childNodes);
+  //     performance.mark('milo-move-snippet');
+  //   }
+  //   widget.removeChild(INLINE_SNIPPET);
+  // } else if (preRenderDropZone) {
+  //   DC_DOMAIN = 'https://www.adobe.com/dc';
+  //   const response = await fetch(DC_GENERATE_CACHE_URL || `${DC_DOMAIN}/dc-generate-cache/dc-hosted-${DC_GENERATE_CACHE_VERSION}/${VERB}-${pageLang}.html`);
+  //   switch (response.status) {
+  //     case 200: {
+  //       const template = await response.text();
+  //       if (!('rendered' in widgetContainer.dataset)) {
+  //         widgetContainer.dataset.rendered = 'true';
+  //         const doc = new DOMParser().parseFromString(template, 'text/html');
+  //         document.head.appendChild(doc.head.getElementsByTagName('Style')[0]);
+  //         widgetContainer.appendChild(doc.body.firstElementChild);
+  //         performance.mark('milo-insert-snippet');
+  //       }
+  //       break;
+  //     }
+  //     default:
+  //       break;
+  //   }
+  // }
 
   window.addEventListener('IMS:Ready', async () => {
     // Redirect Usage
@@ -276,9 +278,9 @@ export default async function init(element) {
   dcScript.dataset.load_typekit = 'false';
   dcScript.dataset.load_imslib = 'false';
   dcScript.dataset.enable_unload_prompt = 'true';
-  if (preRenderDropZone) {
+  // if (preRenderDropZone) {
     dcScript.dataset.pre_rendered = 'true'; // TODO: remove this line
-  }
+  // }
 
   widget.appendChild(dcScript);
 

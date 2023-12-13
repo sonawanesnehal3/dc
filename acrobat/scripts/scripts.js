@@ -280,30 +280,93 @@ const { ietf } = getLocale(locales);
   const widgetBlock = document.querySelector('[class*="dc-converter-widget"]');
 
   if (widgetBlock) {
+    const exhLimitCookieMap = {
+      'to-pdf': 'ac_cr_p_c',
+      'pdf-to': 'ac_ex_p_c',
+      'compress-pdf': 'ac_cm_p_ops',
+      'rotate-pages': 'ac_or_p_c',
+      createpdf: 'ac_cr_p_c',
+    };
+
+    const appEnvCookieMap = {
+      dev: 'd_',
+      stage: 's_',
+      prod: 'p_',
+    };
+
+    const VERB_DIV = widgetBlock.children[0];
+    VERB_DIV.id = 'VERB';
+    const VERB = VERB_DIV.children[0]?.innerText?.trim();
+    // const verb = widgetBlock.children[0].children[0]?.innerText?.trim();
+    const ENV = 'prod';
+    const widgetContainer = document.createElement('div');
+    widgetContainer.id = 'CID';
+    widgetContainer.className = `fsw wapper-${VERB}`;
+    widgetBlock.appendChild(widgetContainer);
+
+    const isRedirection = /redirect_(?:conversion|files)=true/.test(window.location.search);
+    const { cookie } = document;
+    const limitCookie = exhLimitCookieMap[VERB] || exhLimitCookieMap[VERB.match(/^pdf-to|to-pdf$/)?.[0]];
+    const cookiePrefix = appEnvCookieMap[ENV] || '';
+    const isLimitExhausted = limitCookie && cookie.includes(`${cookiePrefix}${limitCookie}`);
+    const preRenderDropZone = !isLimitExhausted && !isRedirection;
+
     document.body.classList.add('dc-bc');
     document.querySelector('header').className = 'global-navigation has-breadcrumbs';
-    const verb = widgetBlock.children[0].children[0]?.innerText?.trim();
     const blockName = widgetBlock.classList.value;
     widgetBlock.removeAttribute('class');
     widgetBlock.id = 'dc-converter-widget';
-    // const DC_GENERATE_CACHE_VERSION = document.querySelector('meta[name="dc-generate-cache-version"]')?.getAttribute('content');
-    // const INLINE_SNIPPET = document.querySelector('section#edge-snippet');
+    const DC_GENERATE_CACHE_VERSION = document.querySelector('meta[name="dc-generate-cache-version"]')?.getAttribute('content');
+    const INLINE_SNIPPET = document.querySelector('section#edge-snippet');
+    if (INLINE_SNIPPET) {
+      if (!isLimitExhausted) {
+        widgetContainer.dataset.rendered = 'true';
+        widgetContainer.appendChild(...INLINE_SNIPPET.childNodes);
+        performance.mark('milo-move-snippet');
+      }
+      widget.removeChild(INLINE_SNIPPET);
+    } else if (preRenderDropZone) {
+      const DC_DOMAIN = 'https://www.adobe.com/dc';
+      const response = await fetch(`${DC_DOMAIN}/dc-generate-cache/dc-hosted-${DC_GENERATE_CACHE_VERSION}/${VERB}-${ietf.toLowerCase()}.html`);
+      switch (response.status) {
+        case 200: {
+          const template = await response.text();
+          if (!('rendered' in widgetContainer.dataset)) {
+            widgetContainer.dataset.rendered = 'true';
+            // console.log(widgetContainer);
+            const doc = new DOMParser().parseFromString(template, 'text/html');
+            document.head.appendChild(doc.head.getElementsByTagName('Style')[0]);
+            widgetContainer.appendChild(doc.body.firstElementChild);
+            console.log('Cache', performance.now());
+            performance.mark('milo-insert-snippet');
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
     // const dcUrls = INLINE_SNIPPET ? [] : [
     //   `https://www.adobe.com/dc/dc-generate-cache/dc-hosted-${DC_GENERATE_CACHE_VERSION}/${verb}-${ietf.toLowerCase()}.html`,
     // ];
 
     // dcUrls.forEach((url) => {
     //   const link = document.createElement('link');
-    //   link.setAttribute('rel', 'prefetch');
+    //   link.setAttribute('rel', 'preload');
     //   if (url.split('.').pop() === 'html') { link.setAttribute('as', 'fetch'); }
     //   if (url.split('.').pop() === 'js') { link.setAttribute('as', 'script'); }
     //   link.setAttribute('href', url);
     //   link.setAttribute('crossorigin', '');
     //   document.head.appendChild(link);
     // });
+    widgetBlock.closest('main > div').dataset.section = 'widget';
+    // widgetBlock.display = 'block';
 
-    const { default: dcConverter } = await import(`../blocks/${blockName}/${blockName}.js`);
-    await dcConverter(widgetBlock);
+    import(`../blocks/${blockName}/${blockName}.js`)
+      .then(async ({ default: dcConverter }) => await dcConverter(widgetBlock));
+
+    // const { default: dcConverter } = await import(`../blocks/${blockName}/${blockName}.js`);
+    // await dcConverter(widgetBlock);
   }
 
   // Setup CSP
