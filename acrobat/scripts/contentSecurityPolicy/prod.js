@@ -46,6 +46,7 @@ const connectSrc = [
   'trial-eum-clienttons-s.akamaihd.net/',
   '*.akstat.io/',
   'rum.hlx.page',
+  'helix-pages.anywhere.run/',
   ';',
 ];
 

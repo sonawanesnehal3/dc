@@ -13,6 +13,12 @@
 /**
  * The decision engine for where to get Milo's libs from.
  */
+function getMetadata(name, doc = document) {
+  const attr = name && name.includes(':') ? 'property' : 'name';
+  const meta = doc.head.querySelector(`meta[${attr}="${name}"]`);
+  return meta && meta.content;
+}
+
 const setLibs = (prodLibs, location) => {
   const { hostname, search } = location || window.location;
   // eslint-disable-next-line compat/compat
@@ -277,6 +283,65 @@ const CONFIG = {
   },
 };
 
+// Setup Milo
+const miloLibs = setLibs(LIBS);
+
+// Running experiment plugin if loaded page is part of experiment
+let pluginContext = {};
+if (getMetadata('experiment')) {
+  window.hlx = {};
+  const utilsLoaded = new Promise((resolve, reject) => {
+    (async () => {
+      try {
+        const { getAllMetadata, loadCSS, loadScript, toCamelCase, toClassName } = await import('./utils.js');
+        resolve({ getAllMetadata, loadCSS, loadScript, toCamelCase, toClassName });
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('Failed loading utils', err);
+        reject();
+      }
+    })();
+  });
+
+  const sampleRUMLoaded = new Promise((resolve, reject) => {
+    (async () => {
+      try {
+        const { sampleRUM } = await import(`${miloLibs}/utils/samplerum.js`);
+        resolve(sampleRUM);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('Failed loading sampleRUM', err);
+        reject();
+      }
+    })();
+  });
+
+  const experimentPluginLoaded = new Promise((resolve, reject) => {
+    (async () => {
+      try {
+        // eslint-disable-next-line import/no-relative-packages
+        const { loadEager } = await import('../../plugins/experimentation/src/index.js');
+        resolve(loadEager);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log('Failed loading experiment plugin', err);
+        reject();
+      }
+    })();
+  });
+
+  try {
+    await Promise.all([utilsLoaded, experimentPluginLoaded, sampleRUMLoaded])
+      .then(async ([utils, loadEager, sampleRUM]) => {
+        pluginContext = { ...utils, getMetadata, sampleRUM };
+        await loadEager(document, {}, pluginContext);
+      });
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.log('Experiment failed', err);
+  }
+}
+
 // Default to loading the first image as eager.
 (async function loadLCPImage() {
   const lcpImg = document.querySelector('img');
@@ -329,9 +394,6 @@ const { ietf } = getLocale(locales);
     }
   })();
 
-  // Setup Milo
-  const miloLibs = setLibs(LIBS);
-
   // Milo and site styles
   if (!document.getElementById('inline-milo-styles')) {
     const paths = [`${miloLibs}/styles/styles.css`];
@@ -340,7 +402,7 @@ const { ietf } = getLocale(locales);
   }
 
   // Import base milo features and run them
-  const { loadArea, setConfig, loadLana, getMetadata } = await import(`${miloLibs}/utils/utils.js`);
+  const { loadArea, setConfig, loadLana } = await import(`${miloLibs}/utils/utils.js`);
 
   addLocale(ietf);
 
@@ -376,4 +438,23 @@ const { ietf } = getLocale(locales);
       window.dispatchEvent(imsIsReady);
     }
   }, 1000);
+
+  // Loading experiment plugin popup
+  if (getMetadata('experiment') && window.hlx?.experiment) {
+    try {
+      // eslint-disable-next-line import/no-relative-packages
+      const { loadLazy } = await import('../../plugins/experimentation/src/index.js');
+      await loadLazy(
+        document,
+        {
+          basePath: window.location.origin,
+          prodHost: 'www.adobe.com',
+        },
+        pluginContext,
+      );
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(err);
+    }
+  }
 }());

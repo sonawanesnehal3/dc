@@ -55,6 +55,7 @@ const connectSrc = [
   '*.hlx.live',
   'cdn.linkedin.oribi.io',
   '*.akstat.io/',
+  'helix-pages.anywhere.run/',
   ';',
 ];
 
