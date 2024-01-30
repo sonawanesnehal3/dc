@@ -28,6 +28,10 @@ div[data-section="widget"] {
   display: none;
 }
 
+div[class^="DCHosted__container"] > div:first-of-type {
+  min-height: 570px;
+}
+
 #dc-converter-widget > div:first-of-type {
   display: none;
 }
