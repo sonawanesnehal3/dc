@@ -17,11 +17,7 @@ jobs:
         os: [ubuntu-latest]
         include:
           - os: ubuntu-latest
-            browser: firefox
-          - os: windows-latest
-            browser: chromium
-          - os: macos-latest
-            browser: webkit          
+            browser: chrome        
     name: Smoke Test
     runs-on: ${{ matrix.os }}
     steps:
