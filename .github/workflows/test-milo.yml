@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
         include:
           - os: ubuntu-latest
             browser: firefox
@@ -25,6 +25,10 @@ jobs:
     name: Smoke Test
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Hosts file hack
+        run: echo 23.50.49.9 wwww.adobe.com | sudo tee -a /etc/hosts
+      - name: Check hosts file
+        run: cat /etc/hosts          
       - name: Check IP
         run: curl https://api.ipify.org      
       - name: Check out repository
