@@ -1,4 +1,4 @@
-name: Verify Edge Worker
+name: Smoke Test
 
 on:
   workflow_dispatch:
@@ -16,34 +16,27 @@ on:
         options:
             - 'prod'
             - 'stage'
-      hostsHack:
-        description: 'Hosts File Hack'
-        required: false
-        type: string
 
 jobs:
   run-tests-gha:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         include:
           - os: ubuntu-latest
-            browser: chrome
-       
+            browser: firefox
+          - os: windows-latest
+            browser: chromium
+          - os: macos-latest
+            browser: webkit
+
     name: Smoke Test
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Hosts file hack
-        if: "${{ github.event.inputs.hostsHack != '' }}"
-        run: echo ${{ inputs.hostsHack }} | sudo tee -a /etc/hosts
-
-      - name: Check hosts file
-        run: cat /etc/hosts
-
       - name: Check IP
         run: curl https://api.ipify.org
-
+    
       - name: Check out repository
         uses: actions/checkout@v3
         with:
@@ -74,4 +67,3 @@ jobs:
         with:
           name: reports
           path: reports/
-
