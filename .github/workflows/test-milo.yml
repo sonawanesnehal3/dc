@@ -1,4 +1,4 @@
-name: Verify Milo Changes
+name: Verify Edge Worker
 
 on:
   workflow_dispatch:
@@ -7,6 +7,18 @@ on:
         description: 'Test Code Branch'
         required: true
         default: 'stage'
+        type: string
+      env:
+        description: 'Environment'
+        type: choice
+        required: true
+        default: 'prod'
+        options:
+            - 'prod'
+            - 'stage'
+      hostsHack:
+        description: 'Hosts File Hack'
+        required: false
         type: string
 
 jobs:
@@ -17,20 +29,26 @@ jobs:
         os: [ubuntu-latest]
         include:
           - os: ubuntu-latest
-            browser: chrome        
+            browser: chrome
+       
     name: Smoke Test
     runs-on: ${{ matrix.os }}
     steps:
       - name: Hosts file hack
-        run: echo 23.50.49.9 wwww.adobe.com | sudo tee -a /etc/hosts
+        if: "${{ github.event.inputs.hostsHack != '' }}"
+        run: echo ${{ inputs.hostsHack }} | sudo tee -a /etc/hosts
+
       - name: Check hosts file
-        run: cat /etc/hosts          
+        run: cat /etc/hosts
+
       - name: Check IP
-        run: curl https://api.ipify.org      
+        run: curl https://api.ipify.org
+
       - name: Check out repository
         uses: actions/checkout@v3
         with:
           ref: ${{ inputs.testCodeBranch }}
+
       - name: Cache dependencies
         id: cache
         uses: actions/cache@v3
@@ -46,7 +64,7 @@ jobs:
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run the tests
-        run: npx run test/e2e -t "@smoke and (not (@analytics or @extension-installed))" -h -p prod -b ${{ matrix.browser }} --bypassBotDetection
+        run: npx run test/e2e -t "@smoke and (not (@analytics or @extension-installed))" -h -p ${{ inputs.env }} -b ${{ matrix.browser }} --bypassBotDetection
         env:
           USER_AGENT_SUFFIX: "${{ secrets.USER_AGENT_SUFFIX }}"
 
