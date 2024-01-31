@@ -15,7 +15,6 @@ on:
         default: 'prod'
         options:
             - 'prod'
-            - 'stage'
 
 jobs:
   run-tests-gha:
