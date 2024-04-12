@@ -1,3 +1,5 @@
+import path from 'path';
+
 export function pageRoutePlugin() {
   return {
     name: 'page-route-command',
@@ -23,6 +25,28 @@ export function pageRoutePlugin() {
             const page = session.browser.getPage(session.id);
             await page.unroute(payload.url);
           }
+          return true;
+        }
+        throw new Error(
+          `Stopping a page route is not supported for browser type ${session.browser.type}.`
+        );
+      } else if (command === 'page-redirect') {
+        if (session.browser.type === 'playwright') {
+          const page = session.browser.getPage(session.id);
+          const relavantPath = path.relative(process.cwd(), path.dirname(session.testFile));
+          await page.route(`**${payload.urlDir}/**`, async (route) => {
+            const url = route.request().url().replace(payload.urlDir, `/${relavantPath}/${payload.path}`);
+            await route.continue({ url });
+          });
+          return true;
+        }
+        throw new Error(
+          `Stopping a page route is not supported for browser type ${session.browser.type}.`,
+        );
+      } else if (command === 'page-unredirect') {
+        if (session.browser.type === 'playwright') {
+          const page = session.browser.getPage(session.id);
+          await page.unroute(`**${payload.urlDir}/**`);
           return true;
         }
         throw new Error(

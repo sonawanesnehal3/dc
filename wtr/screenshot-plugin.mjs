@@ -1,6 +1,7 @@
 /* eslint-disable import/extensions */
 /* eslint-disable import/no-extraneous-dependencies */
 import fs from 'fs';
+import path from 'path';
 import { getComparator } from 'playwright-core/lib/utils';
 
 export function takeScreenshotPlugin() {
@@ -10,13 +11,17 @@ export function takeScreenshotPlugin() {
     async executeCommand({ command, payload, session }) {
       if (command === 'take-screenshot') {
         if (session.browser.type === 'playwright') {
-          let path = payload?.path || `./screenshots/${session.id}.png`;
-          path = path.replace(/\$browser/, session.browser.name);
+          if (payload?.path) {
+            const relavantPath = path.relative(process.cwd(), path.dirname(session.testFile));
+            payload.path = `${relavantPath}/${payload.path}`;
+          }
+          let payloadPath = payload?.path || `./screenshots/${session.id}.png`;
+          payloadPath = payloadPath.replace(/\$browser/, session.browser.name);
           const page = session.browser.getPage(session.id);
           if (payload?.selector) {
-            await page.locator(payload.selector).screenshot({ path });
+            await page.locator(payload.selector).screenshot({ path: payloadPath });
           } else {
-            await page.screenshot({ path, fullPage: true });
+            await page.screenshot({ path: payloadPath, fullPage: true });
           }
           return true;
         }
@@ -28,7 +33,9 @@ export function takeScreenshotPlugin() {
           if (!payload?.path) {
             throw new Error('Missing path for base image.');
           }
-          const basePath = payload.path.replace(/\$browser/, session.browser.name);
+          const relavantPath = path.relative(process.cwd(), path.dirname(session.testFile));
+          const payloadPath = `${relavantPath}/${payload.path}`;
+          const basePath = payloadPath.replace(/\$browser/, session.browser.name);
           const comparator = getComparator('image/png');
           const testPath = basePath.replace(/\.png$/, '.test.png');
           const page = session.browser.getPage(session.id);

@@ -6,7 +6,7 @@ import {
 } from '@web/test-runner-commands';
 import { waitFor, delay } from '../../helpers/waitfor.js';
 
-const screenshotFolder = 'test/integration/accordian/screenshots';
+const screenshotFolder = 'screenshots';
 
 describe('accordian-mobile', function () {
   const suiteName = this.title;

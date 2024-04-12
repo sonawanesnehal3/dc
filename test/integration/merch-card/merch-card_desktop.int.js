@@ -4,9 +4,10 @@ import {
   setViewport,
   executeServerCommand,
 } from '@web/test-runner-commands';
+import sinon from 'sinon';
 import { waitForElement, waitFor, delay } from '../../helpers/waitfor.js';
 
-const screenshotFolder = 'test/integration/merch-card/screenshots';
+const screenshotFolder = 'screenshots';
 
 describe('merch_cards_desktop', function () {
   const suiteName = this.title;
@@ -14,8 +15,10 @@ describe('merch_cards_desktop', function () {
   let screenshotPath;
 
   before(async () => {
+    sinon.stub(console, 'debug');
     await executeServerCommand('page-route', { url: 'https://wcs.adobe.com/**/*' });
 
+    window.adobeIMS = { isSignedInUser: () => false };
     document.head.innerHTML = await readFile({ path: '../mocks/head.html' });
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
     await setViewport({ width: 1200, height: 600 });
@@ -28,6 +31,7 @@ describe('merch_cards_desktop', function () {
 
   after(async () => {
     await executeServerCommand('page-unroute', { url: 'https://wcs.adobe.com/**/*' });
+    sinon.restore();
   });
 
   beforeEach(function () {

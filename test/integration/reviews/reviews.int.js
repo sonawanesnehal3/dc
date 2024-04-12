@@ -31,7 +31,7 @@ async function type(element, text) {
   await sendKeys({ type: text });
 }
 
-const screenshotFolder = 'test/integration/reviews/screenshots';
+const screenshotFolder = 'screenshots';
 
 describe('reviews', function () {
   const suiteName = this.title;
