@@ -2,6 +2,9 @@
   background-color: #fc6767;
   min-height: 570px;
   color: transparent;
+  background-color: #fff;
+  background-image: radial-gradient(at 1% 0,#ff715b 0,transparent 50%),radial-gradient(at 48% 89%,#fff 0,transparent 50%),radial-gradient(at 100% 88%,#fff 0,transparent 50%),radial-gradient(at 1% 85%,#fff 0,transparent 50%),radial-gradient(at 93% 33%,#6d51f9 0,transparent 50%),radial-gradient(at 44% 55%,#c8e1fd 0,transparent 50%),radial-gradient(at 11% 22%,#fe4b38 0,transparent 50%),radial-gradient(at 88% 4%,#ea0f00 0,transparent 50%),radial-gradient(at 45% 0,#fe4b38 0,transparent 50%);
+  min-height: 623px;
 }
 
 .demo-text {
@@ -16,11 +19,15 @@
 }
 
 .widget-sub {
-  margin: 42px auto 0;
-  text-align: center;
+  margin: 0;
+  text-align: left;
   display: flex;
   align-items: center;
   max-width: 300px;
+  padding: 40px 0 0 40px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
 }
 
 .widget-center {
@@ -37,16 +44,17 @@
 
 .widget-legal {
   margin-top: 30px;
-  font-size: 11px;
+  font-size: 14px;
   line-height: 20px;
-  max-width: 420px;
+  max-width: 527px;
   text-align: left;
+  display: inline-block;
+
 }
 
 .widget-icon {
   width: 20px;
   height: 20px;
-
   background-image: url('../../img/icons/widget-icon.png');
   background-size: cover;
   display: inline-block;
@@ -54,27 +62,32 @@
 }
 
 .widget-big-icon {
-  width: 140px;
-  height: 140px;
-  background-image: url(../../img/icons/widget-dz.png);
+  width: 500px;
+  height: 500px;
+  background-image: url(../../img/icons/chat-pdf.png);
   background-size: contain;
   margin: auto;
   background-repeat: no-repeat;
+  display: inline;
+  float: right;
+  position: absolute;
+  right: 0;
+  top: 40px;
 }
 
 .security-icon {
-  width: 30px;
-  height: 30px;
+  width: 42px;
+  height: 42px;
   background-image: url(../../img/icons/widget-sec.png);
   background-size: contain;
   background-repeat: no-repeat;
+  display: inline-block;
 }
 
 .widget-footer {
-  align-items: center;
-    display: flex;
-    flex-flow: row;
-    justify-content: center;
+  padding-top: 24px;
+  margin-top: 70px;
+  text-align: center;
 }
 
 

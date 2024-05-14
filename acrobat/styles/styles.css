@@ -25,6 +25,7 @@
 }
 
 #CID {
+  
   width: 75%;
   max-width: 75%;
   height: auto;
@@ -417,17 +418,21 @@ div.how-to ol li::before{
 }
 
 .widget-heading {
-  font-size: 36px;
-  margin: 0 0 30px;
-  text-align: center;
+  font-size: 82px;
+  font-weight: 600;
+  line-height: 130%;
+  margin: 0;
+  padding: 0 0 0 40px;
+  width: 360px;
 }
 
-
-
 .widget-copy {
-  font-size: 16px;
-  text-align: center;
-  margin: 0 10px;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 33px;
+  text-align: left;
+  padding: 0 0 0 40px;
+  width: 466px;
 }
 
 .widget-center {
@@ -446,7 +451,6 @@ div.how-to ol li::before{
 
 .widget-wrapper {
   margin: 5px;
-  border-radius: 8px;
   background-color: #ffffff;
   min-height: 570px;
   height: 100%;
@@ -454,17 +458,21 @@ div.how-to ol li::before{
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
+  border: 2px dashed #d5d5d5;
+  border-radius: 20px;
 }
 
 .widget-button {
   border-radius: 24px;
-  max-width: 441px;
-  width: 55%;
+  max-width: 138px;
   padding: 10px;
   background: #0265dc;
-  margin: 16px auto;
   text-align: center;
   color: #fff;
+  margin: 32px 0 0 40px;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 48px;-
 }
 
 .widget-button:hover {

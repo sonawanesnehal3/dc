@@ -1,10 +1,23 @@
-// import {createTag} from "../../scripts/miloUtils.js";
+/* eslint-disable guard-for-in */
+// https://console.cloud.google.com/apis/credentials?project=fircpoc
+// Bucket - https://console.cloud.google.com/storage/browser/fric-poc;tab=objects?project=fircpoc&prefix=&forceOnObjectsSortingFiltering=false
+const oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+const form = document.createElement('form');
+form.id = 'theform';
+const bucketName = 'fric-poc';
+const clientID = '772441284722-r6ft7ltrikevn75dk4nbv2jsc8f1lpkh.apps.googleusercontent.com';
+const redirectURL = 'http://localhost:3000/drafts/gunn/api';
+const scope = ['https://www.googleapis.com/auth/devstorage.read_write'];
+const accessToken = 'ya29.a0AXooCgtFv8qPtpi9-Ld_yFnjnkmK39PmvXf6NnoPTQTj3KlOSb7uDyTyi7qo4xc9gESGWU9k0_o-XjABFZUgNy336KQX7o89bKROmXQPR_UiRIS1rUwkOc3mKv99VK4CeRj_7AYQwIM0pB6uMmznrOowLBHMR_qlXmgaCgYKAYsSARISFQHGX2MiGlvMQ90qajnVDYwciSwdmg0170';
+
+let encodeFileName;
+
 const createTag = function createTag(tag, attributes, html) {
   const el = document.createElement(tag);
   if (html) {
     if (html instanceof HTMLElement
-      || html instanceof SVGElement
-      || html instanceof DocumentFragment) {
+        || html instanceof SVGElement
+        || html instanceof DocumentFragment) {
       el.append(html);
     } else if (Array.isArray(html)) {
       el.append(...html);
@@ -18,15 +31,15 @@ const createTag = function createTag(tag, attributes, html) {
     });
   }
   return el;
-}
-
-let loadDC;
-if (!window.localStorage.limit) {
-  window.localStorage.limit = 0
-}
+};
 
 const handleDragOver = (e) => {
   e.preventDefault();
+};
+
+let loadDC;
+if (!window.localStorage.limit) {
+  window.localStorage.limit = 0;
 }
 
 const handleDrop = (e) => {
@@ -35,11 +48,11 @@ const handleDrop = (e) => {
   console.log(e.dataTransfer.files);
   if (e.dataTransfer.items) {
     [...e.dataTransfer.items].forEach((item, i) => {
-      if (item.kind === "file") {
+      if (item.kind === 'file') {
         const file = item.getAsFile();
         if (file.type != 'application/pdf') {
           alert('Please try a PDF');
-          return
+          // return;
         } else {
           loadDC = true;
         }
@@ -50,125 +63,192 @@ const handleDrop = (e) => {
     [...e.dataTransfer.files].forEach((file, i) => {
       if (file.type != 'application/pdf') {
         alert('Please try a PDF');
-        return
+        // return
       } else {
         loadDC = true;
       }
       console.log(`file[${i}].name = ${file.name}`);
     });
   }
-}
+};
 
 
+const getToken = () => {
+  form.setAttribute('method', 'GET'); // Send as a GET request.
+  form.setAttribute('action', oauth2Endpoint);
+
+  const params = {
+    client_id: clientID,
+    redirect_uri: ['http://localhost:3000/'],
+    response_type: 'token',
+    scope: ['https://www.googleapis.com/auth/devstorage.read_write'],
+    include_granted_scopes: 'true',
+    state: 'pass-through value',
+  };
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const p in params) {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'hidden');
+    input.setAttribute('name', p);
+    input.setAttribute('value', params[p]);
+    form.appendChild(input);
+  }
+  document.body.appendChild(form);
+  form.submit();
+};
+
+const upload = () => {
+  const file = document.getElementById('file-upload');
+  const filename = file.value.split('\\').slice(-1)[0];
+  console.log(filename);
+  console.log(`File Name: ${JSON.stringify(filename)}`);
+  encodeFileName = encodeURIComponent(filename);
+  console.log(encodeFileName);
+  const extension = filename.split('.').slice(-1)[0].toLocaleLowerCase();
+  let contentType = null;
+
+  // Detect Content Type
+  if (extension === 'png') {
+    contentType = 'image/png';
+  } else if (extension === 'jpg' || extension === 'jpeg') {
+    contentType = 'image/jpeg';
+  } else if (extension === 'svg') {
+    contentType = 'image/svg+xml';
+  } else if (extension === 'mpeg') {
+    contentType = 'video/mpeg';
+  } else if (extension === 'webm') {
+    contentType = 'video/webm';
+  } else {
+    alert('This file is invalid?');
+  }
+
+  if (contentType) {
+    const reader = new FileReader();
+    reader.addEventListener('load', async (event) => {
+      const bytes = event.target.result;
+      const response = await fetch(
+        `https://storage.googleapis.com/upload/storage/v1/b/${bucketName}/o?uploadType=media&name=${filename}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': contentType,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: bytes,
+        },
+      );
+
+      let result = await response.json();
+      if (result.mediaLink) {
+        alert(
+          `Success to upload ${filename}. You can access it to ${result.mediaLink}`
+        );
+      } else {
+        alert(`Failed to upload ${filename}`);
+      }
+    });
+
+    reader.readAsArrayBuffer(file.files[0]);
+  }
+};
 
 export default function init(element) {
-  console.log(element.querySelectorAll(':scope > div'));
-        //Create Fake Widget
-        // createTag.then((tag) => {
-          const content = element.querySelectorAll(':scope > div');
+  // Create Fake Widget
+  const content = element.querySelectorAll(':scope > div');
 
-          Array.from(content).forEach( (con) => {
-            con.classList.add('hide')
-          })
+  Array.from(content).forEach((con) => {
+    con.classList.add('hide');
+  });
+  element.classList.add('ready');
+  const wrappernew = createTag('div', { id: 'CIDTWO', class: 'fsw widget-wrapper facade' });
+  const wrapper = createTag('div', { id: 'CID', class: 'fsw widget-wrapper' });
+  const heading = createTag('h1', { class: 'widget-heading' }, `${content[1].textContent}`);
+  const dropZone = createTag('div', { id: 'dZone', class: 'widget-center' });
+  const copy = createTag('p', { class: 'widget-copy' }, `${content[2].textContent}`);
+  const button = createTag('input', { type: 'file', id: 'file-upload', class: 'hide' }, `${content[3].textContent}`);
+  const buttonLabel = createTag('label', { for: 'file-upload', class: 'widget-button' }, `${content[3].textContent}`);
+  const legal = createTag('p', { class: 'widget-legal' }, `${content[4].textContent}`);
+  const subTitle = createTag('p', { class: 'widget-sub' }, 'Adobe Acrobat');
+  const upsell = createTag('p', { class: 'demo-text' }, content[5].textContent);
+  const iconLogo = createTag('div', { class: 'widget-icon'});
+  const iconSecurity = createTag('div', { class: 'security-icon' });
+  const icon = createTag('div', { class: 'widget-big-icon' });
+  const footer = createTag('div', { class: 'widget-footer' });
+  if (Number(window.localStorage.limit) > 1) {
+    upsell.classList.remove('hide');
+    wrapper.append(upsell);
+    element.append(wrapper);
+  } else {
+    wrapper.append(subTitle);
+    subTitle.prepend(iconLogo);
+    wrapper.append(icon);
 
-          element.classList.add('ready');
-          // element.setAttribute('ready', '')
+    wrapper.append(heading);
+    // wrapper.append(dropZone);
+    wrapper.append(copy);
+    wrapper.append(button);
+    wrapper.append(buttonLabel);
+    // wrapper.parentNode.appendChild(footer);
+    // wrapper.append(legal);
+    footer.append(iconSecurity);
+    footer.append(legal);
+    element.append(wrapper);
+    element.append(footer);
+    element.append(wrappernew);
+  }
 
+  if (Number(window.localStorage.limit) === 1) {
+    const secondConversion = createTag('p', { class: 'demo-text' }, 'Returning Visitor');
+    heading.prepend(secondConversion);
+  }
 
-          const wrappernew = createTag('div', {id: 'CIDTWO', class: `fsw widget-wrapper facade` });
-          const wrapper = createTag('div', {id: 'CID', class: `fsw widget-wrapper ` });
-          const heading = createTag('h1', { class: 'widget-heading' }, `${content[1].textContent}`);
-          const dropZone = createTag('div', { id: 'dZone', class: 'widget-center' });
-          const copy = createTag('p', { class: 'widget-copy' }, `${content[2].textContent}`);
-          const button = createTag('input', { type: 'file', id: 'file-upload', class: 'hide' }, `${content[3].textContent}`);
-          const buttonLabel = createTag('label', { for: 'file-upload', class: 'widget-button' }, `${content[3].textContent}`);
-          const legal = createTag('p', { class: 'widget-legal' }, `${content[4].textContent}`);
-          const subTitle = createTag('p',{ class: 'widget-sub' } , 'Adobe Acrobat');
-          const upsell = createTag('p',{ class: 'demo-text' } , content[5].textContent);
+  dropZone.addEventListener('dragover', (file) => {
+    handleDragOver(file);
+    dropZone.classList.add('dragging');
+  });
+  dropZone.addEventListener('dragleave', (file) => {
+    dropZone.classList.remove('dragging');
+  });
 
-          const iconLogo = createTag('div',{ class:  'widget-icon'} );
-          const iconSecurity = createTag('div',{ class:  'security-icon'} );
-          const icon = createTag('div',{ class:  'widget-big-icon'} );
-          
-          const footer = createTag('div',{ class:  'widget-footer'} );
+  window.addEventListener('DC_Hosted:Ready', () => {
+    window.dc_hosted.addEventListener((e) => {
+      console.log(e);
+      if (e === 'dropzone-displayed') {
+        document.querySelector('#CIDTWO').id = 'CID'
+      }
+    });
+  });
 
+  dropZone.addEventListener('drop', (file) => {
+    handleDrop(file);
+    dropZone.classList.remove('dragging');
+    // make call to dc web and pass over file
+    if (loadDC) { window.localStorage.limit = 1 + Number(window.localStorage.limit); }
+    upload();
+  });
 
-          if (Number(window.localStorage.limit) > 1) {
-            upsell.classList.remove('hide')
-            wrapper.append(upsell);
-            element.append(wrapper);
-          } else {
-            wrapper.append(subTitle);
-            subTitle.prepend(iconLogo);
-            wrapper.append(heading);
-            wrapper.append(dropZone)
-            dropZone.append(copy);
-            copy.prepend(icon);
-            dropZone.append(button);
-            dropZone.append(buttonLabel);
-            wrapper.append(footer)
-            // wrapper.append(legal);
-            footer.append(iconSecurity);
-            footer.append(legal);
-            element.append(wrapper);
-            element.append(wrappernew);
-          }
+  button.addEventListener('click', (e) => {
+    // getToken();
+    // upload();
+  });
 
-          if (Number(window.localStorage.limit) === 1 ) {
-            const secondConversion = createTag('p',{ class: 'demo-text' } , 'Returning Visitor');
-            heading.prepend(secondConversion);
-          }
+  button.addEventListener('change', (e) => {
+    console.log(element);
+    upload();
 
-          const dcWidgetScript = createTag('script', {
-            id: 'adobe_dc_sdk_launcher',
-            src: 'https://stage.acrobat.adobe.com/dc-hosted/3.8.0_2.15.2/dc-app-launcher.js',
-            'data-dropzone_id': 'CIDTWO',
-            'data-locale': 'us-en',
-            'data-server_env': 'prod',
-            'data-verb': 'pdf-to-ppt',
-            'data-load_typekit': 'false',
-            'data-load_imslib': 'false',
-            'data-enable_unload_prompt': 'true',
-          });
+    const selectedFile = document.getElementById('file-upload').files[0];
+    console.log(selectedFile);
+    if (loadDC) { window.localStorage.limit = 1 + Number(window.localStorage.limit); }
+    setTimeout(() => {
+      // window.location = `https://storage.cloud.google.com/fric-poc/${encodeFileName}`;
+      window.location = `https://console.cloud.google.com/storage/browser/_details/fric-poc/${encodeFileName};tab=live_object?project=fircpoc`;
+    }, 3000);
+    console.log(`https://storage.cloud.google.com/fric-poc/${encodeFileName.replace(/['"]+/g, '')}`);
+  });
 
-          dropZone.addEventListener('dragover', (file) => {
-            handleDragOver(file);
-            dropZone.classList.add('dragging');
-          });
-          dropZone.addEventListener('dragleave', (file) => {
-            dropZone.classList.remove('dragging');
-          })
-
-
-          window.addEventListener('DC_Hosted:Ready', () => {
-
-            window.dc_hosted.addEventListener((e) => {
-              console.log(e);
-              if (e === 'dropzone-displayed') {
-                document.querySelector('#CIDTWO').id = 'CID'
-              }
-            });
-          });
-
-          dropZone.addEventListener('drop', (file) => {
-            handleDrop(file);
-            dropZone.classList.remove('dragging');
-            //make call to dc web and pass over file 
-            element.querySelector('#CID').append(dcWidgetScript)
-            // if (loadDC) {element.querySelector('#CID').append(dcWidgetScript) }
-            if (loadDC) {window.localStorage.limit = 1 + Number(window.localStorage.limit) }
-            // loadScript('https://stage.acrobat.adobe.com/dc-hosted/3.10.0_2.16.2/dc-app-launcher.js');
-          })
-
-          button.addEventListener('change', (e) => {
-            console.log(element);
-            const selectedFile = document.getElementById("file-upload").files[0];
-            console.log(selectedFile);
-            element.querySelector('#CID').append(dcWidgetScript)
-
-            // if (loadDC) {element.querySelector('#CID').append(dcWidgetScript) }
-            if (loadDC) {window.localStorage.limit = 1 + Number(window.localStorage.limit) }
-          })
-        // })
-
+  document.querySelector('.widget-sub').addEventListener('click', (e) => {
+    console.log('get tolc');
+    getToken();
+  });
 }
