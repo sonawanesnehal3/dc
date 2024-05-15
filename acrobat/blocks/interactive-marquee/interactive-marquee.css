@@ -14,6 +14,18 @@
   opacity: 0;
 }
 
+.interactive-marquee.dark {
+  color: var(--color-white);
+}
+
+.interactive-marquee.dark a {
+  color: #fff;
+}
+
+.interactive-marquee.dark .slider-arrow {
+  filter: invert(1);
+}
+
 .interactive-marquee.light,
 .interactive-marquee.mobile-light,
 .interactive-marquee.quiet:not(.dark),
@@ -67,6 +79,7 @@
   border: 1px solid #E6E6E6;
   border-radius: 4px;
   gap: 0;
+  color: var(--text-color);
 }
 
 .slide {
