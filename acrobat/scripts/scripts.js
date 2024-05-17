@@ -295,11 +295,12 @@ const CONFIG = {
   if (lcpImg) {
     const src = lcpImg.getAttribute('src');
     if (src) {
-      // Create a link element for preloading the image
+      // Create a link element for preloading the image with high priority
       const link = document.createElement('link');
       link.rel = 'preload';
       link.as = 'image';
       link.href = src;
+      link.setAttribute('fetchpriority', 'high');
       document.head.appendChild(link);
 
       // Set the loading attribute to eager
