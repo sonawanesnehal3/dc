@@ -290,10 +290,22 @@ const CONFIG = {
   imsScope: 'AdobeID,openid,gnav,pps.read,firefly_api,additional_info.roles,read_organizations',
 };
 
-// Default to loading the first image as eager.
 (async function loadLCPImage() {
   const lcpImg = document.querySelector('img');
-  lcpImg?.setAttribute('loading', 'eager');
+  if (lcpImg) {
+    const src = lcpImg.getAttribute('src');
+    if (src) {
+      // Create a link element for preloading the image
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'image';
+      link.href = src;
+      document.head.appendChild(link);
+
+      // Set the loading attribute to eager
+      lcpImg.setAttribute('loading', 'eager');
+    }
+  }
 }());
 
 /*
