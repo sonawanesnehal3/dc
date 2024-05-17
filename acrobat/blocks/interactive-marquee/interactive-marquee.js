@@ -14,6 +14,17 @@ const blockTypeSizes = {
   },
 };
 
+const getImage = (el) => {
+  const img = el.querySelector('picture') || el.querySelector('a[href$=".svg"') || el.querySelector('.icon');
+  if (img) {
+    const wrapper = document.createElement('span');
+    wrapper.classList.add('icon-wrapper');
+    wrapper.appendChild(img);
+    return wrapper;
+  }
+  return null;
+};
+
 function decorateText(el, size) {
   const headings = el.querySelectorAll('h1, h2, h3, h4, h5, h6');
   const heading = headings[headings.length - 1];
@@ -169,7 +180,7 @@ export default async function init(el) {
         title.icon = info[2].innerHTML;
       } else {
         const data = {
-          icon: info[0].querySelector('.icon') || null,
+          icon: getImage(info[0]),
           label: info[1].innerHTML !== '' ? info[1].innerHTML : null,
           video: info[2].querySelectorAll('a').length > 0 ? info[2].querySelectorAll('a') : null,
         };
