@@ -290,25 +290,19 @@ const CONFIG = {
   imsScope: 'AdobeID,openid,gnav,pps.read,firefly_api,additional_info.roles,read_organizations',
 };
 
+// Default to loading the first image as eager.
 (async function loadLCPImage() {
   const lcpImg = document.querySelector('img');
   if (lcpImg) {
     const src = lcpImg.getAttribute('src');
     if (src) {
-      // Create a link element for preloading the image with high priority
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = src;
-      link.setAttribute('fetchpriority', 'high');
-      document.head.appendChild(link);
-
+      // Set the fetchpriority attribute to high
+      lcpImg.setAttribute('fetchpriority', 'high');
       // Set the loading attribute to eager
       lcpImg.setAttribute('loading', 'eager');
     }
   }
 }());
-
 /*
  * ------------------------------------------------------------
  * Edit below at your own risk
