@@ -134,6 +134,7 @@ function createSlide(slide) {
 }
 
 function createSlideComponents(slides) {
+  const nav = createTag('div', { class: 'slider-nav' });
   const tabs = createTag('ul', { class: 'slider-tabs', role: 'tablist' });
   const deck = createTag('div', { class: 'slider-deck' });
   let firstSlideActive = true;
@@ -146,10 +147,11 @@ function createSlideComponents(slides) {
       firstSlideActive = false;
     }
     tabs.append(tab);
+    nav.append(tabs);
     deck.append(slideElement);
   });
 
-  return { tabs, deck };
+  return { nav, deck, tabs };
 }
 
 function addDarkClassIfNecessary(element) {
@@ -195,9 +197,9 @@ export default async function init(el) {
     const interactive = createTag('div', { class: 'interactive-container' });
     const slider = createTag('div', { class: 'slider' });
     const text = createTitleElement(title);
-    const { tabs, deck } = createSlideComponents(slides);
-    if (text) slider.append(text);
-    slider.append(deck, tabs);
+    const { nav, deck, tabs } = createSlideComponents(slides);
+    if (text) nav.append(text);
+    slider.append(deck, nav);
     handleSlideChange(tabs, deck);
     interactive.append(slider);
     foreground.append(interactive);
